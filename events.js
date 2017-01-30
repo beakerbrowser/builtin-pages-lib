@@ -1,9 +1,10 @@
-import * as yo from 'yo-yo'
+const yo = require('yo-yo')
 
-export function writeToClipboard (str) {
+function writeToClipboard (str) {
   var textarea = yo`<textarea>${str}</textarea>`
   document.body.appendChild(textarea)
   textarea.select()
   document.execCommand('copy')
   document.body.removeChild(textarea)
 }
+exports.writeToClipboard = writeToClipboard

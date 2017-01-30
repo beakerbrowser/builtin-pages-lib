@@ -1,23 +1,11 @@
 
-// helper to make node-style CBs into promises
-// usage: cbPromise(cb => myNodeStyleMethod(cb)).then(...)
-export function cbPromise (method, b) {
-  return new Promise((resolve, reject) => {
-    method((err, value) => {
-      if (err) reject(err)
-      else     resolve(value)
-    })
-  })
-}
-
-
 // Underscore.js
 // Returns a function, that, when invoked, will only be triggered at most once
 // during a given window of time. Normally, the throttled function will run
 // as much as it can, without ever going more than once per `wait` duration;
 // but if you'd like to disable the execution on the leading edge, pass
 // `{leading: false}`. To disable execution on the trailing edge, ditto.
-export function throttle (func, wait, options) {
+exports.throttle = function throttle (func, wait, options) {
   var timeout, context, args, result;
   var previous = 0;
   if (!options) options = {};
@@ -63,7 +51,7 @@ export function throttle (func, wait, options) {
 // be triggered. The function will be called after it stops being called for
 // N milliseconds. If `immediate` is passed, trigger the function on the
 // leading edge, instead of the trailing.
-export function debounce (func, wait, immediate) {
+exports.debounce = function debounce (func, wait, immediate) {
   var timeout, result;
 
   var later = function(context, args) {

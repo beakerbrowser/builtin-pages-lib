@@ -1,8 +1,8 @@
-import co from 'co'
-import emitStream from 'emit-stream'
-import speedometer from 'speedometer'
-import EventEmitter from 'events'
-import { throttle, debounce } from '../functions'
+const co = require('co')
+const emitStream = require('emit-stream')
+const speedometer = require('speedometer')
+const EventEmitter = require('events')
+const { throttle, debounce } = require('../functions')
 
 // constants
 // =
@@ -19,7 +19,7 @@ var archivesEvents
 // exported api
 // =
 
-export default class ArchivesList extends EventEmitter {
+module.exports = class ArchivesList extends EventEmitter {
   constructor () {
     super()
 

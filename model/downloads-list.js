@@ -1,7 +1,7 @@
-import co from 'co'
-import emitStream from 'emit-stream'
-import EventEmitter from 'events'
-import { writeToClipboard } from '../events'
+const co require('co')
+const emitStream require('emit-stream')
+const EventEmitter require('events')
+const { writeToClipboard } require('../events')
 
 // globals
 // =
@@ -12,7 +12,7 @@ var dlEvents
 // exported api
 // =
 
-export default class DownloadsList extends EventEmitter {
+module.exports = class DownloadsList extends EventEmitter {
   constructor () {
     super()
 

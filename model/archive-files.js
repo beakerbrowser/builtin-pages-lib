@@ -1,9 +1,9 @@
-import co from 'co'
+const co = require('co')
 
 // exported api
 // =
 
-export default class ArchiveFiles {
+module.exports = class ArchiveFiles {
   constructor (archiveInfo) {
     var m = archiveInfo.manifest
 
