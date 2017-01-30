@@ -1,7 +1,7 @@
-const co require('co')
-const emitStream require('emit-stream')
-const EventEmitter require('events')
-const { writeToClipboard } require('../events')
+const co = require('co')
+const emitStream = require('emit-stream')
+const EventEmitter = require('events')
+const { writeToClipboard } = require('../events')
 
 // globals
 // =
