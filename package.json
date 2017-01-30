@@ -1,0 +1,25 @@
+{
+  "name": "builtin-pages-lib",
+  "version": "1.0.0",
+  "description": "Some common library code for Beaker's builtin pages.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beakerbrowser/builtin-pages-lib.git"
+  },
+  "author": "Paul Frazee <pfrazee@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/beakerbrowser/builtin-pages-lib/issues"
+  },
+  "homepage": "https://github.com/beakerbrowser/builtin-pages-lib#readme",
+  "dependencies": {
+    "co": "^4.6.0",
+    "emit-stream": "^0.1.2",
+    "speedometer": "^1.0.0",
+    "yo-yo": "^1.4.0"
+  }
+}
