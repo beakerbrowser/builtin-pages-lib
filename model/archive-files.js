@@ -68,7 +68,7 @@ module.exports = class ArchiveFiles {
     }
   }
 
-  setCurrentNodeByPath(names) {
+  setCurrentNodeByPath(names, {allowFiles}={}) {
     this.currentNode = this.rootNode
     if (names.length === 0 || names[0] == '')
       return // at root
@@ -76,7 +76,7 @@ module.exports = class ArchiveFiles {
     // descend to the correct node (or as far as possible)
     for (var i=0; i < names.length; i++) {
       var child = this.currentNode.children[names[i]]
-      if (!child || child.entry.type != 'directory')
+      if (!child || (allowFiles !== true && child.entry.type != 'directory'))
         return // child dir not found, stop here
       this.currentNode = child
     }
