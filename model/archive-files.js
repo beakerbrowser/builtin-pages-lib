@@ -68,17 +68,28 @@ module.exports = class ArchiveFiles {
     }
   }
 
-  setCurrentNodeByPath(names, {allowFiles}={}) {
-    this.currentNode = this.rootNode
+  getNodeByPath(path, {allowFiles}={}) {
+    const names = Array.isArray(path) ? path : path.split('/')
+
+    var currentNode = this.rootNode
     if (names.length === 0 || names[0] == '')
-      return // at root
+      return currentNode // at root
 
     // descend to the correct node (or as far as possible)
     for (var i=0; i < names.length; i++) {
-      var child = this.currentNode.children[names[i]]
+      var child = currentNode.children[names[i]]
       if (!child || (allowFiles !== true && child.entry.type != 'directory'))
-        return // child dir not found, stop here
-      this.currentNode = child
+        return null // not found, stop here
+      currentNode = child
+    }
+
+    return currentNode
+  }
+
+  setCurrentNodeByPath(path, opts) {
+    var node = this.getNodeByPath(path, opts)
+    if (node) {
+      this.currentNode = node
     }
   }
 
