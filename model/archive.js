@@ -51,6 +51,7 @@ module.exports = class Archive extends EventEmitter {
       self.files = (self.info) ? new ArchiveFiles(self.info) : null
       console.log(self.info)
       console.log(self.files)
+      self.emitChanged()
     })
   }
 
