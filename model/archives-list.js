@@ -1,7 +1,6 @@
-const co = require('co')
 const emitStream = require('emit-stream')
 const speedometer = require('speedometer')
-const EventEmitter = require('events')
+const EventTarget = require('./event-target')
 const { throttle, debounce } = require('../functions')
 
 // constants
@@ -10,81 +9,60 @@ const { throttle, debounce } = require('../functions')
 // how much time to wait between throttle emits
 const EMIT_CHANGED_WAIT = 500
 
-// globals
-// =
-
-// emit-stream for archive events, only one per document is needed
-var archivesEvents
-
 // exported api
 // =
 
-module.exports = class ArchivesList extends EventEmitter {
+module.exports = class ArchivesList extends EventTarget {
   constructor () {
     super()
 
     // declare attributes
     this.archives = []
 
-    // bind the event handlers
-    this.onUpdateArchive = e => this._onUpdateArchive(e)
-    this.onUpdateUserSettings = e => this._onUpdateUserSettings(e)
-
     // wire up events
-    if (!archivesEvents) {
-      archivesEvents = emitStream(datInternalAPI.archivesEventStream())
-    }
-    archivesEvents.on('update-archive', this.onUpdateArchive)
-    archivesEvents.on('update-user-settings', this.onUpdateUserSettings)
+    beaker.library.addEventListener('added', this.onAdd.bind(this))
+    beaker.library.addEventListener('removed', this.onRemove.bind(this))
+    beaker.library.addEventListener('updated', this.onUpdate.bind(this))
 
     // create a throttled 'change' emiter
-    this.emitChanged = throttle(() => this.emit('changed'), EMIT_CHANGED_WAIT)
+    this.emitChanged = throttle(() => this.dispatchEvent({type: 'changed'}), EMIT_CHANGED_WAIT)
   }
 
-  setup ({ filter, fetchStats } = {}) {
-    var self = this
-    return co(function * () {
-      // fetch archives
-      self.archives = yield datInternalAPI.queryArchives(filter, { includeMeta: true })
-      self.archives.sort(archiveSortFn)
-      // fetch stats
-      if (fetchStats) {
-        var stats = yield Promise.all(self.archives.map(a => datInternalAPI.getArchiveStats(a.key)))
-        self.archives.forEach((archive, i) => {
-          archive.stats = stats[i]
-          archive.stats.downloadSpeed = speedometer()
-        })
-      }
+  setup (filter) {
+    // fetch archives
+    return beaker.library.list(filter).then(archives => {
+      this.archives = archives
+      this.archives.sort(archiveSortFn)
     })
-  }
-
-  destroy () {
-    // unwire events
-    this.removeAllListeners()
-    archivesEvents.removeListener('update-archive', this.onUpdateArchive)
   }
 
   // event handlers
   // =
 
-  _onUpdateArchive (update) {
-    // find the archive being updated
-    var archive = this.archives.find(a => a.key === update.key)
-    if (archive) {
-      // patch the archive
-      for (var k in update)
-        archive[k] = update[k]
+  onAdd (e) {
+    var archive = this.archives.find(a => a.url === e.details.url)
+    if (archive) return
+    beaker.library.get(e.details.url).then(archive => {
+      this.archives.push(archive)
       this.emitChanged()
-    }
+    })
   }
 
-  _onUpdateUserSettings (update) {
+  onRemove (e) {
+    var index = this.archives.findIndex(a => a.url === e.details.url)
+    if (index === -1) return
+    this.archives.splice(index, 1)
+    this.emitChanged()
+  }
+
+  onUpdate (e) {
     // find the archive being updated
-    var archive = this.archives.find(a => a.key === update.key)
+    var archive = this.archives.find(a => a.url === e.details.url)
     if (archive) {
       // patch the archive
-      for (var k in update)
-        archive.userSettings[k] = update[k]
+      for (var k in e.details) {
+        archive[k] = e.details[k]
+      }
       this.emitChanged()
     }
   }
@@ -94,5 +72,5 @@ module.exports = class ArchivesList extends EventEmitter {
 // =
 
 function archiveSortFn (a, b) {
-  return b.mtime - a.mtime
+  return (a.title||'Untitled').localeCompare(b.title||'Untitled')
 }

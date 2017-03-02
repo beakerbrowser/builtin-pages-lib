@@ -1,4 +1,3 @@
-const co = require('co')
 const emitStream = require('emit-stream')
 const EventEmitter = require('events')
 const { writeToClipboard } = require('../events')
@@ -33,10 +32,9 @@ module.exports = class DownloadsList extends EventEmitter {
   }
 
   setup () {
-    var self = this
-    return co(function * () {
-      // fetch downloads
-      self.downloads = yield beakerDownloads.getDownloads()
+    // fetch downloads
+    return beakerDownloads.getDownloads().then(downloads => {
+      this.downloads = downloads
     })
   }
 
