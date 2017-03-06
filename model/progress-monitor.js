@@ -1,4 +1,5 @@
 const EventTarget = require('./event-target')
+const {throttle} = require('../functions')
 
 module.exports = class ProgressMonitor extends EventTarget {
   constructor(archive) {
