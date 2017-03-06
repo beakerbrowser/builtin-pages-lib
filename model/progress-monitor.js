@@ -1,3 +1,4 @@
+const EventTarget = require('./event-target')
 
 module.exports = class ProgressMonitor extends EventTarget {
   constructor(archive) {
