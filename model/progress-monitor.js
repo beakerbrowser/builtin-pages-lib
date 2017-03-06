@@ -1,6 +1,12 @@
 const EventTarget = require('./event-target')
 const {throttle} = require('../functions')
 
+// constants
+// =
+
+// how much time to wait between throttle emits
+const EMIT_CHANGED_WAIT = 30
+
 module.exports = class ProgressMonitor extends EventTarget {
   constructor(archive) {
     super()
