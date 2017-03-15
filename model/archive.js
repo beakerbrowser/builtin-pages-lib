@@ -51,6 +51,7 @@ module.exports = class LibraryDatArchive extends DatArchive {
   }
 
   setPath(path) {
+    if (!path) return
     this.path = path || '/'
     return this.listFiles(this.path, {downloadedBlocks: true}).then(files => {
       this.files = files
