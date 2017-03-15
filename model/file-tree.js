@@ -15,6 +15,11 @@ module.exports = class FileTree {
       setNode(this.rootNode, path, entry)
     }
   }
+
+  addNode (entry) {
+    var path = entry.name.split('/').filter(Boolean)
+    setNode(this.rootNode, path, entry)
+  }
 }
 
 function createNode (entry) {
