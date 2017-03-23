@@ -26,7 +26,7 @@ module.exports = class LibraryDatArchive extends DatArchive {
     this.fileActivity = this.createFileActivityStream()
     this.fileActivity.addEventListener('changed', this.onFileChanged.bind(this))
     this.fileActivity.addEventListener('invalidated', this.onFileInvalidated.bind(this))
-    beaker.library.addEventListener('updated', (this.onLibraryUpdated = e => {
+    beaker.archives.addEventListener('updated', (this.onLibraryUpdated = e => {
       if (e.details.url === this.url) {
         this.getInfo().then(info => {
           this.info = info
@@ -79,7 +79,7 @@ module.exports = class LibraryDatArchive extends DatArchive {
   destroy () {
     // unwire events
     this.listeners = {}
-    beaker.library.removeEventListener('updated', this.onLibraryUpdated)
+    beaker.archives.removeEventListener('updated', this.onLibraryUpdated)
     this.fileActivity.close()
     this.fileActivity = null
   }
@@ -108,12 +108,12 @@ module.exports = class LibraryDatArchive extends DatArchive {
 
   toggleSaved() {
     if (this.isSaved) {
-      beaker.library.remove(this.url).then(() => {
+      beaker.archives.remove(this.url).then(() => {
         this.info.userSettings.isSaved = false
         this.emitChanged()
       })
     } else {
-      beaker.library.add(this.url).then(() => {
+      beaker.archives.add(this.url).then(() => {
         this.info.userSettings.isSaved = true
         this.emitChanged()
       })

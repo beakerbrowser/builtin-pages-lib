@@ -20,9 +20,9 @@ module.exports = class ArchivesList extends EventTarget {
     this.archives = []
 
     // wire up events
-    beaker.library.addEventListener('added', this.onAdd.bind(this))
-    beaker.library.addEventListener('removed', this.onRemove.bind(this))
-    beaker.library.addEventListener('updated', this.onUpdate.bind(this))
+    beaker.archives.addEventListener('added', this.onAdd.bind(this))
+    beaker.archives.addEventListener('removed', this.onRemove.bind(this))
+    beaker.archives.addEventListener('updated', this.onUpdate.bind(this))
 
     // create a throttled 'change' emiter
     this.emitChanged = throttle(() => this.dispatchEvent({type: 'changed'}), EMIT_CHANGED_WAIT)
@@ -30,7 +30,7 @@ module.exports = class ArchivesList extends EventTarget {
 
   setup (filter) {
     // fetch archives
-    return beaker.library.list(filter).then(archives => {
+    return beaker.archives.list(filter).then(archives => {
       this.archives = archives
       this.archives.sort(archiveSortFn)
     })
@@ -42,7 +42,7 @@ module.exports = class ArchivesList extends EventTarget {
   onAdd (e) {
     var archive = this.archives.find(a => a.url === e.details.url)
     if (archive) return
-    beaker.library.get(e.details.url).then(archive => {
+    beaker.archives.get(e.details.url).then(archive => {
       this.archives.push(archive)
       this.emitChanged()
     })
