@@ -23,7 +23,14 @@ module.exports = class FileTree {
 }
 
 function createNode (entry) {
-  var niceName = entry.name.split('/').pop()
+  var niceName
+  var nameParts = entry.name.split('/')
+  do {
+    niceName = nameParts.pop()
+  } while (!niceName && nameParts.length > 0)
+  if (niceName.startsWith('buffer~~')) {
+    niceName = 'Unsaved file'
+  }
   if (entry.type === 'directory') {
     return {entry, niceName, children: {}}
   }
