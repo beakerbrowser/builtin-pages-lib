@@ -13,7 +13,7 @@ const EMIT_CHANGED_WAIT = 500
 // =
 
 module.exports = class ArchivesList extends EventTarget {
-  constructor () {
+  constructor ({listenNetwork} = {}) {
     super()
 
     // declare attributes
@@ -23,6 +23,9 @@ module.exports = class ArchivesList extends EventTarget {
     beaker.archives.addEventListener('added', this.onAdd.bind(this))
     beaker.archives.addEventListener('removed', this.onRemove.bind(this))
     beaker.archives.addEventListener('updated', this.onUpdate.bind(this))
+    if (listenNetwork) {
+      beaker.archives.addEventListener('network-changed', this.onNetworkChange.bind(this))
+    }
 
     // create a throttled 'change' emiter
     this.emitChanged = throttle(() => this.dispatchEvent({type: 'changed'}), EMIT_CHANGED_WAIT)
@@ -62,6 +65,29 @@ module.exports = class ArchivesList extends EventTarget {
       // patch the archive
       for (var k in e.details) {
         archive[k] = e.details[k]
+      }
+      this.emitChanged()
+    }
+  }
+
+  onNetworkChange (e) {
+    // find the archive being updated
+    var archive = this.archives.find(a => a.url === e.details.url)
+    if (archive) {
+      // patch the archive
+      archive.peers = e.details.peers
+      if (archive.peerHistory) {
+        var now = Date.now()
+        var lastHistory = archive.peerHistory.slice(-1)[0]
+        if (lastHistory && (now - lastHistory.ts) < 10e3) {
+          // if the last datapoint was < 10s ago, just update it
+          lastHistory.peers = archive.peers
+        } else {
+          archive.peerHistory.push({
+            ts: Date.now(),
+            peers: archive.peers
+          })
+        }
       }
       this.emitChanged()
     }
