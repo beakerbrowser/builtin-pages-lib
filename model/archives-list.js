@@ -31,12 +31,10 @@ module.exports = class ArchivesList extends EventTarget {
     this.emitChanged = throttle(() => this.dispatchEvent({type: 'changed'}), EMIT_CHANGED_WAIT)
   }
 
-  setup (filter) {
+  async setup (filter) {
     // fetch archives
-    return beaker.archives.list(filter).then(archives => {
-      this.archives = archives
-      this.archives.sort(archiveSortFn)
-    })
+    this.archives = await beaker.archives.list(filter)
+    this.archives.sort(archiveSortFn)
   }
 
   // event handlers

@@ -12,7 +12,7 @@ module.exports = class ProgressMonitor extends EventTarget {
     super()
     this.archive = archive
     this.networkActivity = null
-    this.downloadedBlocks = 0
+    this.downloaded = 0
     this.blocks = -1
     this.isDownloading = false
 
@@ -28,18 +28,20 @@ module.exports = class ProgressMonitor extends EventTarget {
     return this.fetchAllStats()
   }
 
-  fetchAllStats() {
-    // fetch all file entries
-    return this.archive.listFiles('/', {downloadedBlocks: true, depth: false}).then(allfiles => {
-      // count blocks
-      this.blocks = 0
-      this.downloadedBlocks = 0
-      for (var k in allfiles) {
-        this.blocks += allfiles[k].blocks
-        this.downloadedBlocks += allfiles[k].downloadedBlocks
-      }
-    })
+  async fetchAllStats() {
+    // list all files
+    var names = await this.archive.readdir('/', {recursive: true})
 
+    // fetch all entries
+    var entries = await Promise.all(names.map(name => this.archive.stat(name)))    
+
+    // count blocks
+    this.downloaded = 0
+    this.blocks = 0
+    entries.forEach(entry => {
+      this.downloaded += entry.downloaded
+      this.blocks += entry.blocks
+    })
   }
 
   destroy() {
@@ -51,11 +53,11 @@ module.exports = class ProgressMonitor extends EventTarget {
   }
 
   get current() {
-    return Math.min(Math.round(this.downloadedBlocks / this.blocks * 100), 100)
+    return Math.min(Math.round(this.downloaded / this.blocks * 100), 100)
   }
 
   get isComplete() {
-    return this.downloadedBlocks >= this.blocks
+    return this.downloaded >= this.blocks
   }
 
   onDownload(e) {
@@ -63,15 +65,15 @@ module.exports = class ProgressMonitor extends EventTarget {
     // rather than check if the block is one of ours, assume it is
     // we'll refetch the full stats every 10s to correct inaccuracies
     // (and we shouldnt be downloading historic data anyway)
-    this.downloadedBlocks++
+    this.downloaded++
 
     // is this a block in one of our files?
     // for (var k in this.allfiles) {
     //   let file = this.allfiles[k]
     //   let block = e.block - file.content.blockOffset
     //   if (block >= 0 && block < file.blocks) {
-    //     file.downloadedBlocks++
-    //     this.downloadedBlocks++
+    //     file.downloaded++
+    //     this.downloaded++
     //   }
     // }
     this.emitChanged()

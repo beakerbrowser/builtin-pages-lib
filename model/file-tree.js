@@ -5,15 +5,24 @@ module.exports = class FileTree {
 
   async setup() {
     // list all files
-    var entries = await this.archive.listFiles('/', {depth: false})
+    var names = await this.archive.readdir('/', {recursive: true})
+
+    // fetch all entries
+    var entries = await Promise.all(names.map(async name => {
+      var entry = await this.archive.stat(name)
+      entry.name = name
+      return entry
+    }))
 
     // construct a tree structure
-    this.rootNode = createNode({ type: 'directory', name: '/' })
+    this.rootNode = createNode({isDirectory: ()=>true, isFile: ()=>false, name: '/'})
     for (var k in entries) {
       let entry = entries[k]
       var path = entry.name.split('/').filter(Boolean)
       setNode(this.rootNode, path, entry)
     }
+
+    console.log(this)
   }
 
   addNode (entry) {
@@ -31,9 +40,8 @@ function createNode (entry) {
   if (niceName.startsWith('buffer~~')) {
     niceName = 'Unsaved file'
   }
-  if (entry.type === 'directory') {
+  if (entry.isDirectory())
     return {entry, niceName, children: {}}
-  }
   return {entry, niceName}
 }
 
@@ -51,7 +59,8 @@ function setNode (node, path, entry, i=0) {
     if (!node.children[subname]) {
       // put a default folder entry there
       node.children[subname] = createNode({
-        type: 'directory',
+        isDirectory: ()=>true,
+        isFile: ()=>false,
         name: path.slice(0, i).join('/')
       })
     }

@@ -17,15 +17,10 @@ module.exports = class LibraryDatArchive extends DatArchive {
 
     // declare attributes
     this.info = null
-    this.path = '/'
-    this.files = {}
     this.history = []
     this.progress = null
 
     // wire up events
-    this.fileActivity = this.createFileActivityStream()
-    this.fileActivity.addEventListener('changed', this.onFileChanged.bind(this))
-    this.fileActivity.addEventListener('invalidated', this.onFileInvalidated.bind(this))
     beaker.archives.addEventListener('updated', (this.onLibraryUpdated = e => {
       if (e.details.url === this.url) {
         this.getInfo().then(info => {
@@ -39,35 +34,18 @@ module.exports = class LibraryDatArchive extends DatArchive {
     this.emitChanged = throttle(() => this.dispatchEvent({type: 'changed'}), EMIT_CHANGED_WAIT)
   }
 
-  setup (path) {
-    return Promise.all([
-      this.getInfo().then(info => {
-        this.info = info
-        this.emitChanged()
-        console.log(this.info)
-      }),
-      this.setPath(path)
-    ])
+  async setup () {
+    this.info = await this.getInfo()
+    this.emitChanged()
+    console.log(this.info)
   }
 
-  setPath(path) {
-    if (!path) return
-    this.path = path || '/'
-    return this.listFiles(this.path, {downloadedBlocks: true}).then(files => {
-      this.files = files
-      console.log(this.path, this.files)
-      this.emitChanged()
-    })
-  }
-
-  fetchHistory() {
+  async fetchHistory() {
     if (this.__fetchingHistory) return
     this.__fetchingHistory = true
-
-    return this.listHistory().then(history => {
-      this.history = history
-      this.emitChanged()
-    })
+    this.history = await this.history()
+    this.__fetchingHistory = false
+    this.emitChanged()
   }
 
   startMonitoringDownloadProgress() {
@@ -80,8 +58,8 @@ module.exports = class LibraryDatArchive extends DatArchive {
     // unwire events
     this.listeners = {}
     beaker.archives.removeEventListener('updated', this.onLibraryUpdated)
-    this.fileActivity.close()
-    this.fileActivity = null
+    if (this.progress) this.progress.destroy()
+    this.progress = null
   }
 
   // getters
@@ -118,19 +96,6 @@ module.exports = class LibraryDatArchive extends DatArchive {
         this.emitChanged()
       })
     }
-  }
-
-  // event handlers
-  // =
-
-  onFileChanged(e) {
-    this.setPath(this.path) // refetch files
-    this.emitChanged()
-  }
-
-  onFileInvalidated(e) {
-    this.setPath(this.path) // refetch files
-    this.emitChanged()
   }
 }
 
