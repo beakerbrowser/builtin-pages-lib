@@ -61,7 +61,7 @@ function setNode (node, path, entry, i=0) {
       node.children[subname] = createNode({
         isDirectory: ()=>true,
         isFile: ()=>false,
-        name: path.slice(0, i).join('/')
+        name: path.slice(0, i + 1).join('/')
       })
     }
     // descend
