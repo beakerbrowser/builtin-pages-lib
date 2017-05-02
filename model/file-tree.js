@@ -1,11 +1,12 @@
 module.exports = class FileTree {
-  constructor(archive) {
+  constructor(archive, {onDemand} = {}) {
     this.archive = archive
+    this.opts = {onDemand}
   }
 
-  async setup() {
+  async setup () {
     // list all files
-    var names = await this.archive.readdir('/', {recursive: true})
+    let names = await this.archive.readdir('/', {recursive: !this.opts.onDemand})
 
     // fetch all entries
     var entries = await Promise.all(names.map(async name => {
@@ -25,9 +26,29 @@ module.exports = class FileTree {
     console.log(this)
   }
 
+  // this can be used to add new entries from the outside
   addNode (entry) {
     var path = entry.name.split('/').filter(Boolean)
     setNode(this.rootNode, path, entry)
+  }
+
+  // this needs to be used if onDemand == false, to expand folders
+  async readFolder (node) {
+    // list all files
+    let names = await this.archive.readdir(node.entry.name)
+
+    // fetch all entries
+    var entries = await Promise.all(names.map(async name => {
+      name = node.entry.name + '/' + name
+      var entry = await this.archive.stat(name)
+      entry.name = name
+      return entry
+    }))
+
+    // add child nodes
+    for (var k in entries) {
+      this.addNode(entries[k])
+    }
   }
 }
 
@@ -37,11 +58,9 @@ function createNode (entry) {
   do {
     niceName = nameParts.pop()
   } while (!niceName && nameParts.length > 0)
-  if (niceName.startsWith('buffer~~')) {
-    niceName = 'Unsaved file'
-  }
-  if (entry.isDirectory())
+  if (entry.isDirectory()) {
     return {entry, niceName, children: {}}
+  }
   return {entry, niceName}
 }
 
