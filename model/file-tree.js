@@ -35,19 +35,13 @@ module.exports = class FileTree {
   // this needs to be used if onDemand == false, to expand folders
   async readFolder (node) {
     // list all files
-    let names = await this.archive.readdir(node.entry.name)
-
-    // fetch all entries
-    var entries = await Promise.all(names.map(async name => {
-      name = node.entry.name + '/' + name
-      var entry = await this.archive.stat(name)
-      entry.name = name
-      return entry
-    }))
+    let entries = await this.archive.readdir(node.entry.name, {stat: true})
 
     // add child nodes
     for (var k in entries) {
-      this.addNode(entries[k])
+      var entry = entries[k].stat
+      entry.name = node.entry.name + '/' + entries[k].name
+      this.addNode(entry)
     }
   }
 }
