@@ -73,7 +73,7 @@ module.exports = class ArchivesList extends EventTarget {
     var archive = this.archives.find(a => a.url === e.details.url)
     if (archive) {
       // patch the archive
-      archive.peers = e.details.peers
+      archive.peers = e.details.peerCount
       if (archive.peerHistory) {
         var now = Date.now()
         var lastHistory = archive.peerHistory.slice(-1)[0]
