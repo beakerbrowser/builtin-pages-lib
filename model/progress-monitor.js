@@ -42,7 +42,7 @@ module.exports = class ProgressMonitor extends EventTarget {
   }
 
   destroy() {
-    this.clearInterval(this.interval)
+    clearInterval(this.interval)
     this.listeners = {}
     if (this.networkActivity) {
       this.networkActivity.close()
