@@ -30,17 +30,14 @@ module.exports = class ProgressMonitor extends EventTarget {
 
   async fetchAllStats() {
     // list all files
-    var names = await this.archive.readdir('/', {recursive: true})
-
-    // fetch all entries
-    var entries = await Promise.all(names.map(name => this.archive.stat(name)))    
+    var entries = await this.archive.readdir('/', {recursive: true, stat: true}) 
 
     // count blocks
     this.downloaded = 0
     this.blocks = 0
     entries.forEach(entry => {
-      this.downloaded += entry.downloaded
-      this.blocks += entry.blocks
+      this.downloaded += entry.stat.downloaded
+      this.blocks += entry.stat.blocks
     })
   }
 
