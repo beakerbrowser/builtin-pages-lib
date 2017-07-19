@@ -6,21 +6,15 @@ module.exports = class FileTree {
 
   async setup () {
     // list all files
-    let names = await this.archive.readdir('/', {recursive: !this.opts.onDemand})
-
-    // fetch all entries
-    var entries = await Promise.all(names.map(async name => {
-      var entry = await this.archive.stat(name)
-      entry.name = name
-      return entry
-    }))
+    let entries = await this.archive.readdir('/', {stat: true, recursive: !this.opts.onDemand})
 
     // construct a tree structure
     this.rootNode = createNode({isDirectory: ()=>true, isFile: ()=>false, name: '/'})
     for (var k in entries) {
       let entry = entries[k]
+      entry.stat.name = entry.name
       var path = entry.name.split('/').filter(Boolean)
-      setNode(this.rootNode, path, entry)
+      setNode(this.rootNode, path, entry.stat)
     }
 
     console.log(this)
