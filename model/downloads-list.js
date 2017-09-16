@@ -24,11 +24,11 @@ module.exports = class DownloadsList extends EventEmitter {
 
     // wire up events
     if (!dlEvents) {
-      dlEvents = emitStream(beaker.downloads.createEventsStream())
+      dlEvents = beaker.downloads.createEventsStream()
     }
-    dlEvents.on('new-download', this.onNewDownload)
-    dlEvents.on('updated', this.onUpdateDownload)
-    dlEvents.on('done', this.onUpdateDownload)
+    dlEvents.addEventListener('new-download', this.onNewDownload)
+    dlEvents.addEventListener('updated', this.onUpdateDownload)
+    dlEvents.addEventListener('done', this.onUpdateDownload)
   }
 
   setup () {
@@ -41,9 +41,9 @@ module.exports = class DownloadsList extends EventEmitter {
   destroy () {
     // unwire events
     this.removeAllListeners()
-    dlEvents.removeListener('new-download', this.onNewDownload)
-    dlEvents.removeListener('updated', this.onUpdateDownload)
-    dlEvents.removeListener('done', this.onUpdateDownload)
+    dlEvents.removeEventListener('new-download', this.onNewDownload)
+    dlEvents.removeEventListener('updated', this.onUpdateDownload)
+    dlEvents.removeEventListener('done', this.onUpdateDownload)
   }
 
   // actions
