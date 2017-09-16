@@ -24,7 +24,7 @@ module.exports = class DownloadsList extends EventEmitter {
 
     // wire up events
     if (!dlEvents) {
-      dlEvents = emitStream(beakerDownloads.eventsStream())
+      dlEvents = emitStream(beaker.downloads.createEventsStream())
     }
     dlEvents.on('new-download', this.onNewDownload)
     dlEvents.on('updated', this.onUpdateDownload)
@@ -33,7 +33,7 @@ module.exports = class DownloadsList extends EventEmitter {
 
   setup () {
     // fetch downloads
-    return beakerDownloads.getDownloads().then(downloads => {
+    return beaker.downloads.getDownloads().then(downloads => {
       this.downloads = downloads
     })
   }
@@ -50,15 +50,15 @@ module.exports = class DownloadsList extends EventEmitter {
   // =
 
   pauseDownload (download) {
-    beakerDownloads.pause(download.id)
+    beaker.downloads.pause(download.id)
   }
 
   resumeDownload (download) {
-    beakerDownloads.resume(download.id)
+    beaker.downloads.resume(download.id)
   }
 
   cancelDownload (download) {
-    beakerDownloads.cancel(download.id)
+    beaker.downloads.cancel(download.id)
   }
 
   copyDownloadLink (download) {
@@ -66,7 +66,7 @@ module.exports = class DownloadsList extends EventEmitter {
   }
 
   showDownload (download) {
-    beakerDownloads.showInFolder(download.id)
+    beaker.downloads.showInFolder(download.id)
       .catch(err => {
         download.fileNotFound = true
         this.emit('changed')
@@ -74,7 +74,7 @@ module.exports = class DownloadsList extends EventEmitter {
   }
 
   openDownload (download) {
-    beakerDownloads.open(download.id)
+    beaker.downloads.open(download.id)
       .catch(err => {
         download.fileNotFound = true
         this.emit('changed')
@@ -82,7 +82,7 @@ module.exports = class DownloadsList extends EventEmitter {
   }
 
   removeDownload (download) {
-    beakerDownloads.remove(download.id)
+    beaker.downloads.remove(download.id)
     this.downloads.splice(this.downloads.indexOf(download), 1)
     this.emit('changed')
   }
