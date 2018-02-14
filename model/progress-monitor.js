@@ -36,8 +36,10 @@ module.exports = class ProgressMonitor extends EventTarget {
     this.downloaded = 0
     this.blocks = 0
     entries.forEach(entry => {
-      this.downloaded += entry.stat.downloaded
-      this.blocks += entry.stat.blocks
+      if (entry.stat.isFile()) {
+        this.downloaded += entry.stat.downloaded
+        this.blocks += entry.stat.blocks
+      }
     })
   }
 
