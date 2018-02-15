@@ -17,7 +17,7 @@ module.exports = class LibraryDatArchive extends DatArchive {
 
     // declare attributes
     this.info = null
-    this.history = []
+    this.fetchedHistory = []
     this.progress = null
 
     // wire up events
@@ -43,7 +43,7 @@ module.exports = class LibraryDatArchive extends DatArchive {
   async fetchHistory() {
     if (this.__fetchingHistory) return
     this.__fetchingHistory = true
-    this.history = await this.history()
+    this.fetchedHistory = await this.history()
     this.__fetchingHistory = false
     this.emitChanged()
   }
