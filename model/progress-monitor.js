@@ -15,12 +15,17 @@ module.exports = class ProgressMonitor extends EventTarget {
     this.downloaded = 0
     this.blocks = -1
     this.isDownloading = false
+    this._isSetup = false
+    this._isFetchingStats = false
 
     // create a throttled 'change' emiter
     this.emitChanged = throttle(() => this.dispatchEvent({type: 'changed'}), EMIT_CHANGED_WAIT)
   }
 
   setup() {
+    if (this._isSetup) return
+    this._isSetup = true
+  
     // start watching network activity
     this.networkActivity = this.archive.createNetworkActivityStream()
     this.networkActivity.addEventListener('download', this.onDownload.bind(this))
@@ -29,8 +34,13 @@ module.exports = class ProgressMonitor extends EventTarget {
   }
 
   async fetchAllStats() {
+    if (this._isFetchingStats) {
+      return
+    }
+    this._isFetchingStats = true
+
     // list all files
-    var entries = await this.archive.readdir('/', {recursive: true, stat: true}) 
+    var entries = await this.archive.readdir('/', {recursive: true, stat: true, timeout: 60e3}) 
 
     // count blocks
     this.downloaded = 0
@@ -41,6 +51,8 @@ module.exports = class ProgressMonitor extends EventTarget {
         this.blocks += entry.stat.blocks
       }
     })
+
+    this._isFetchingStats = false
   }
 
   destroy() {

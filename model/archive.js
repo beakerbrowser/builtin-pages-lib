@@ -18,7 +18,7 @@ module.exports = class LibraryDatArchive extends DatArchive {
     // declare attributes
     this.info = null
     this.fetchedHistory = []
-    this.progress = null
+    this.progress = new ProgressMonitor(this)
 
     // wire up events
     beaker.archives.addEventListener('updated', (this.onLibraryUpdated = e => {
@@ -49,8 +49,6 @@ module.exports = class LibraryDatArchive extends DatArchive {
   }
 
   startMonitoringDownloadProgress() {
-    if (this.progress) return Promise.resolve()
-    this.progress = new ProgressMonitor(this)
     return this.progress.setup()
   }
 
