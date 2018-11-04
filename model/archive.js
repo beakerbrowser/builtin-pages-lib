@@ -35,7 +35,7 @@ module.exports = class LibraryDatArchive extends DatArchive {
   }
 
   async setup () {
-    this.info = await this.getInfo()
+    this.info = await this.getInfo({timeout: 30e3})
     this.emitChanged()
     console.log(this.info)
   }
